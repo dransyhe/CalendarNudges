@@ -14,8 +14,11 @@ calendar_data = pd.read_csv("input.csv", header=None, names=col_names)
 keyWords = ["meeting", "panel", "discussion", "session", "webinar", "team"]
 irreWords = ["block", "busy", "hold", "offline", "office hours", "lunch", "dinner", "edited", "cancel", "leave work"]
 #tk = StanfordTokenizer() 
-titles = calendar_data['meetingtitle'] 
-results = []
+calendar_data.meetingtitle = calendar_data.meetingtitle.astype(str)
+titles = calendar_data['meetingtitle'].values.tolist()
+key = []
+irre = [] 
+acr = [] 
 for i in range(len(titles)): 
 	#words = list(tk.tokenize(titles[i])) 
 	keyword_f = False
@@ -25,10 +28,10 @@ for i in range(len(titles)):
 			keyword_f = True 
 		elif words[j] in irreWords:
 			irreword_f = True """
-	if "<>" in titles[i] or "< >" in titles[i]:
-		acrosscompany = True
+	if ("<>" in titles[i]) or ("< >" in titles[i]):
+		accrosscompany = True
 	else:
-		acrosscompany = False
+		accrosscompany = False
 	titles[i] = titles[i].lower()
 	for keyword in keyWords:
 		if keyword in titles[i]:
@@ -38,11 +41,19 @@ for i in range(len(titles)):
 		if irreword in titles[i]:
 			irreword_f = True 
 			break 
-	results.append([keyword_f, irreword_f, acrosscompany])
-calendar_data['keyword', 'irreword', 'accrosscompany'] = results 
+	key.append(keyword_f)
+	irre.append(irreword_f)
+	acr.append(accrosscompany)
+#calendar_data['keyword', 'irreword', 'accrosscompany'] = results 
+calendar_data['keyword'] = key
+calendar_data['irreword'] = irre 
+calendar_data['accrosscompany'] = acr 
+
+
 
 # feature selection
-feature_cols = ['jobrole', 'companysize', 'teamsize', 'noguest', 'keyword', 'irreword', 'accrosscompany'] 
+#feature_cols = ['companysize', 'teamsize', 'noguest', 'keyword', 'irreword', 'accrosscompany'] 
+feature_cols = ['noguest', 'keyword', 'irreword', 'accrosscompany'] 
 X = calendar_data[feature_cols] 
 y = calendar_data.relevance 
 
