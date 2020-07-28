@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier 
 from sklearn.model_selection import train_test_split 
 from sklearn import metrics 
-from nltk.tokenize.stanford import StanfordTokenizer 
+#from nltk.tokenize.stanford import StanfordTokenizer 
 
 
 # read the input data file in CSV
@@ -10,12 +10,39 @@ col_names = ['username', 'jobrole', 'instructor', 'companyname', 'timezone', 'co
 			 'teamsize', 'starttime', 'lastsync', 'meetingtitle', 'noguest', 'relevance'] 
 calendar_data = pd.read_csv("input.csv", header=None, names=col_names)
 
-# tokenise the meetingtitle 
-tk = StanfordTokenizer() 
-# LATER: feature engineering for meetingtitle 
+# tokenise the meetingtitle and checks if contain keywords, irrelevantwords 
+keyWords = ["meeting", "panel", "discussion", "session", "webinar", "team"]
+irreWords = ["block", "busy", "hold", "offline", "office hours", "lunch", "dinner", "edited", "cancel", "leave work"]
+#tk = StanfordTokenizer() 
+titles = calendar_data['meetingtitle'] 
+results = []
+for i in range(len(titles)): 
+	#words = list(tk.tokenize(titles[i])) 
+	keyword_f = False
+	irreword_f = False 
+	"""for j in range(len(words)):
+		if words[j] in keyWords:
+			keyword_f = True 
+		elif words[j] in irreWords:
+			irreword_f = True """
+	if "<>" in titles[i] or "< >" in titles[i]:
+		acrosscompany = True
+	else:
+		acrosscompany = False
+	titles[i] = titles[i].lower()
+	for keyword in keyWords:
+		if keyword in titles[i]:
+			keyword_f = True
+			break
+	for irreword in irreWords:
+		if irreword in titles[i]:
+			irreword_f = True 
+			break 
+	results.append([keyword_f, irreword_f, acrosscompany])
+calendar_data['keyword', 'irreword', 'accrosscompany'] = results 
 
 # feature selection
-feature_cols = ['jobrole', 'companysize', 'teamsize', 'meetingtitle', 'noguest'] 
+feature_cols = ['jobrole', 'companysize', 'teamsize', 'noguest', 'keyword', 'irreword', 'accrosscompany'] 
 X = calendar_data[feature_cols] 
 y = calendar_data.relevance 
 
