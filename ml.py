@@ -44,16 +44,33 @@ for i in range(len(titles)):
 	key.append(keyword_f)
 	irre.append(irreword_f)
 	acr.append(accrosscompany)
-#calendar_data['keyword', 'irreword', 'accrosscompany'] = results 
 calendar_data['keyword'] = key
 calendar_data['irreword'] = irre 
 calendar_data['accrosscompany'] = acr 
 
+# adjust companysize and teamsize to handle '<'
+calendar_data.companysize = calendar_data.companysize.astype(str)
+calendar_data.teamsize = calendar_data.teamsize.astype(str)
+companysize = calendar_data['companysize'].values.tolist()
+teamsize = calendar_data['teamsize'].values.tolist()
+companysize1 = []
+teamsize1 = []
+for i in range(len(companysize)):
+	size = ''.join(i for i in companysize[i] if i.isdigit())
+	if size == '':
+		size = '0'
+	companysize1.append(size)
+	size = ''.join(i for i in teamsize[i] if i.isdigit())
+	if size == '':
+		size = '0'
+	teamsize1.append(size)
+calendar_data['companysize'] = companysize1
+calendar_data['teamsize'] = teamsize1
+
 
 
 # feature selection
-#feature_cols = ['companysize', 'teamsize', 'noguest', 'keyword', 'irreword', 'accrosscompany'] 
-feature_cols = ['noguest', 'keyword', 'irreword', 'accrosscompany'] 
+feature_cols = ['companysize', 'teamsize', 'noguest', 'keyword', 'irreword', 'accrosscompany'] 
 X = calendar_data[feature_cols] 
 y = calendar_data.relevance 
 
