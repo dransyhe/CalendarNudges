@@ -14,7 +14,7 @@ from sklearn import tree
 # read the input data file in CSV
 col_names = ['username', 'jobrole', 'instructor', 'companyname', 'timezone', 'companysize', \
 			 'teamsize', 'starttime', 'lastsync', 'meetingtitle', 'noguest', 'relevance'] 
-calendar_data = pd.read_csv("input2.csv", header=0, names=col_names)
+calendar_data = pd.read_csv("input_files/input2.csv", header=0, names=col_names)
 
 
 #creates lists of username, companyname, title, noguests, timezone and startime
