@@ -2,8 +2,13 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier 
 from sklearn.model_selection import train_test_split 
 from sklearn import metrics
-#from nltk.tokenize.stanford import StanfordTokenizer 
+#from sklearn.ensemble import BaggingClassifier
 import checks
+
+# visualise the decision tree
+import matplotlib.pyplot as plt
+from sklearn import tree 
+
 
 
 # read the input data file in CSV
@@ -84,12 +89,36 @@ y = calendar_data.relevance
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
 # building decision tree model 
-clf = DecisionTreeClassifier()
+clf = DecisionTreeClassifier(criterion="entropy", max_depth=10)  # the parameters can be adjusted to improve accuracy
+                                                                 # "criterion" : optional (default=”gini”) : gini, entropy
+                                                                 # "splitter" : string, optional (default=”best”) : best, random 
+                                                                 # "max_depth" : int or None, optional (default=None): int or None
+"""
+# Use of bagging to optimise -- parameters to be discussed
+clf = BaggingClassifier(dclf, n_estimators = 10, max_samples = 0.5, max_features = 0.5, \
+                        bootstrap = True, bootstrap_features = True, oob_score = True, \
+                        warm_start = False, random_state = 0)
+"""
 clf = clf.fit(X_train,y_train)
 y_pred = clf.predict(X_test)
 
+
+
 # evaluating model 
 print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
+
+# visualise the decision tree 
+fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=1000)
+tree.plot_tree(clf,
+               feature_names = feature_cols, 
+               class_names=["y","n"],
+               filled = True);
+fig.savefig('decisiontree.png')
+
+
+
+
+
 
 
 
