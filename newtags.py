@@ -111,7 +111,7 @@ feature_cols = ["noguest", "userfullname", "workday", "worktime", "usercompany",
                  "andbetweenpersons", "firstnameandsurname", "personinmeeting", "teamspiritcheck",
                  "projectcheck", "timekeywordscheck", "onetoonecheck", "broadcastcheck", "performancecheck", "irrelevantcheck",
                  "externalcheck"]
-#Currently the two first name ones aren't working not sure why???
+#Currently the two first name ones aren't working not sure why??
 
 X = calendar_data[feature_cols]
 
