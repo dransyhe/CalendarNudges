@@ -160,7 +160,7 @@ def only_firstname(meeting):
         return 0
     
 
-#evaluates the word list
+#evaluates the word lisst
 def evaluate_wordlist(meeting_list, word_list, correct_tag):
     word_dict = {}
     for word in word_list:
