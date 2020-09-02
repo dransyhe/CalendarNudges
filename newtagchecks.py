@@ -1,6 +1,5 @@
 import datetime
 import re
-import nltk
 from nltk import word_tokenize
 
 from sner import Ner
@@ -94,7 +93,7 @@ def first_name_only(meeting):
 
 #returns 1 if brackets follow a person - kinda works at getting e.g. Jane (Multiplii) but people use it also for Jane (Task)
 def brackets_following_person(meeting):
-    title = and_sub(meeting)
+    title = and_sub(meeting["title"])
     for (word, entity) in tagger.tag(title):
         if entity == "PERSON":
             start_index = title.index(word) + len(word)
