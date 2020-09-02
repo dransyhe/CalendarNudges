@@ -1,12 +1,14 @@
 import pandas as pd
-from checks import *
+from newtagchecks import *
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import metrics
 
 
-
-# read the input data file in CSV
-col_names = ['username', 'jobrole', 'instructor', 'companyname', 'timezone', 'companysize', \
+#read the input data file in CSV
+col_names = ['username', 'jobrole', 'instructor', 'companyname', 'timezone', 'companysize',
 			 'teamsize', 'starttime', 'lastsync', 'meetingtitle', 'noguest', 'tag'] 
-calendar_data = pd.read_csv("New Tagged.csv", header=0, names=col_names)
+calendar_data = pd.read_csv("input_files/New Tagged.csv", header=0, names=col_names)
 
 #creates lists of username, companyname, title, noguests, timezone and startime
 calendar_data.username = calendar_data.username.astype(str)
@@ -46,6 +48,85 @@ for i in range(len(usernames_list)):
 
 company_dict = create_company_dict(meeting_list)
 
+#creates empty lists for each of the features
+userfullname = []
+workday = []
+worktime = []
+usercompany = []
+onlyuserfirst = []
+bracketsafterperson = []
+andbetweenpersons = []
+firstnameandsurname = []
+onlyfirstname = []
+personinmeeting = []
+teamspiritcheck = []
+projectcheck = []
+timekeywordscheck = []
+onetoonecheck = []
+broadcastcheck = []
+performancecheck = []
+irrelevantcheck = []
+externalcheck = []
+
+#populates the feature list
+for meeting in meeting_list:
+    userfullname.append(users_fullname(meeting))
+    workday.append(not_workday(meeting))
+    worktime.append(not_worktime(meeting))
+    usercompany.append(user_company_in_title(meeting, company_dict))
+    onlyuserfirst.append(first_name_only(meeting))
+    bracketsafterperson.append(brackets_following_person(meeting))
+    andbetweenpersons.append(and_between_persons(meeting))
+    firstnameandsurname.append(firstname_and_surname(meeting))
+    personinmeeting.append(person_in_meeting(meeting))
+    teamspiritcheck.append(word_list_check(teamspirit_keywords,meeting))
+    projectcheck.append(word_list_check(project_keywords,meeting))
+    timekeywordscheck.append(word_list_check(time_keywords,meeting))
+    onetoonecheck.append(word_list_check(time_keywords,meeting))
+    broadcastcheck.append(word_list_check(broadcast_keywords,meeting))
+    performancecheck.append(word_list_check(performance_keywords, meeting))
+    irrelevantcheck.append(word_list_check(irrelevant_keywords,meeting))
+    externalcheck.append(word_list_check(external_keywords, meeting))
+
+calendar_data["userfullname"] = userfullname
+calendar_data["workday"] = workday
+calendar_data["worktime"] = worktime
+calendar_data["usercompany"] = usercompany
+#calendar_data["onlyuserfirst"] = onlyuserfirst
+calendar_data["bracketsafterperson"] = bracketsafterperson
+calendar_data["andbetweenpersons"] = andbetweenpersons
+calendar_data["firstnameandsurname"] = firstnameandsurname
+#calendar_data["onlyfirstname"] = onlyfirstname
+calendar_data["personinmeeting"] = personinmeeting
+calendar_data["teamspiritcheck"] = teamspiritcheck
+calendar_data["projectcheck"] = projectcheck
+calendar_data["timekeywordscheck"] = timekeywordscheck
+calendar_data["onetoonecheck"] = onetoonecheck
+calendar_data["broadcastcheck"] = broadcastcheck
+calendar_data["performancecheck"] = performancecheck
+calendar_data["irrelevantcheck"] = irrelevantcheck
+calendar_data["externalcheck"] = externalcheck
+
+feature_cols = ["noguest", "userfullname", "workday", "worktime", "usercompany", "bracketsafterperson",
+                 "andbetweenpersons", "firstnameandsurname", "personinmeeting", "teamspiritcheck",
+                 "projectcheck", "timekeywordscheck", "onetoonecheck", "broadcastcheck", "performancecheck", "irrelevantcheck",
+                 "externalcheck"]
+#Currently the two first name ones aren't working not sure why?
+
+X = calendar_data[feature_cols]
+
+#manual  tags
+y = calendar_data.tag
+
+# splitting data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
 
+# building decision tree model
+clf = DecisionTreeClassifier()
+clf = clf.fit(X_train,y_train)
+y_pred = clf.predict(X_test)
 
+
+# evaluating model
+print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
