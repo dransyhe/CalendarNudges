@@ -2,6 +2,7 @@ import datetime
 import re
 import numpy as np
 from nltk import word_tokenize
+import pandas as pd
 
 #for the named entity recoginition
 from sner import Ner
@@ -9,7 +10,7 @@ tagger = Ner(host = "localhost", port = 9199)
 
 #checks if the user's full name is included in the meeting title, if either username or title blank returns 0
 def users_fullname(meeting):
-    if meeting["username"] == None or meeting["title"] == None:
+    if pd.isnull(meeting["username"]) or pd.isnull(meeting["title"]):
         return 0
     if str(meeting["username"]).lower() in str(meeting["title"]).lower():
         return 1
@@ -18,7 +19,7 @@ def users_fullname(meeting):
 
 # returns 1 if the meeting occurs on a nonworkday, returns 0 if the starttime is blank
 def not_workday(meeting):
-    if meeting["starttime"] == None:
+    if pd.isnull(meeting["starttime"]):
         return 0
     if meeting["starttime"].isocalendar()[2] >= 6:
         return 1
@@ -27,7 +28,7 @@ def not_workday(meeting):
 
 # returns 1 if the meeting does not occur on work time, returns 0 if the starttime is blank
 def not_worktime(meeting):
-    if meeting["starttime"] == None:
+    if pd.isnull(meeting["starttime"]):
         return 0
     if meeting["starttime"].time() < datetime.time(6) or meeting["starttime"].time() > datetime.time(21):
         return 1
@@ -36,7 +37,7 @@ def not_worktime(meeting):
 
 # checks in a word is included in the meeting title, returns 0 if the meeting title is blank
 def word_in_title(word, meeting):
-    if meeting["title"] == None:
+    if pd.isnull(meeting["title"]):
         return 0
     return word.lower() in str(meeting["title"]).lower()
 
@@ -51,7 +52,7 @@ def word_list_check(word_list, meeting):
 
 # returns 1 if the meeting title only contains the user's first name, returns 0 if either title or username is blank
 def first_name_only(meeting):
-    if meeting["username"] == None or meeting["title"] == None:
+    if pd.isnull(meeting["username"]) or pd.isnull(meeting["title"]):
         return 0
     user_names = word_tokenize(meeting["username"])
     if word_in_title(user_names[0], meeting) and not word_in_title(user_names[1], meeting):
@@ -62,7 +63,7 @@ def first_name_only(meeting):
 
 # returns 1 if brackets follow a person - kinda works at getting e.g. Jane (Multiplii) but people use it also for Jane (Task)
 def brackets_following_person(meeting):
-    if meeting["title"] == None:
+    if pd.isnull(meeting["title"]):
         return 0
     title = and_sub(meeting["title"])
     for (word, entity) in tagger.tag(title):
@@ -77,7 +78,7 @@ def brackets_following_person(meeting):
 
 # returns 1 if "and" between two people - works pretty well at identifying external meetings
 def and_between_persons(meeting):
-    if meeting["title"] == None:
+    if pd.isnull(meeting["title"]):
         return 0
     entities = tagger.tag(meeting["title"])
     for index in range(len(entities)):
@@ -90,7 +91,7 @@ def and_between_persons(meeting):
 
 # checks if 2 person entities follow each other
 def firstname_and_surname(meeting):
-    if meeting["title"] == None:
+    if pd.isnull(meeting["title"]):
         return 0
     title = meeting["title"]
     title = and_sub(title)
@@ -135,7 +136,7 @@ def only_firstname(meeting):
 
 # checks if there is at least one person tag in the meeting
 def person_in_meeting(meeting):
-    if meeting["title"] == None:
+    if pd.isnull(meeting["title"]):
         return 0
     title = lower_keywords(meeting["title"])
     title = and_sub(title)
@@ -156,7 +157,7 @@ def lower_keywords(title):
 
 # returns 1 if the user's company is in the title
 def user_company_in_title(meeting, company_dict):
-    if meeting["companyname"] != None and meeting["title"] != None:
+    if not pd.isnull(meeting["companyname"]) and  pd.isnull(meeting["title"]):
         alternate_list = company_dict[meeting["companyname"]]
         for alternate in alternate_list:
             if str(alternate).lower() in str(meeting["title"]).lower():
@@ -167,7 +168,7 @@ def user_company_in_title(meeting, company_dict):
 # creates a dictonary of company titles including some alternative spellings
 def create_company_dict(meeting_list):
     company_dic = {}
-    for company_name in list(set([meeting["companyname"] for meeting in meeting_list if meeting["companyname"] != None])):
+    for company_name in list(set([meeting["companyname"] for meeting in meeting_list if not pd.isnull(meeting["companyname"])])):
         company_dic[company_name] = [company_name, \
                                      company_name.strip(" "), \
                                      ''.join(ch for ch in company_name if ch.isupper()), \

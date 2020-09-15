@@ -1,6 +1,7 @@
 import pandas as pd
 import datetime
 import re
+import numpy as np
 
 
 def meeting_list_generator(calendar_data):
@@ -33,19 +34,19 @@ def meeting_list_generator(calendar_data):
     return meeting_list
 
 
-#converts a string to integer unless the string is not an integer then returns None
+#converts a string to integer unless the string is not an integer then returns np.nan
 def check_num(string):
     try:
         return int(string)
     except ValueError:
-        return None
+        return np.nan
 
-#check if the string is empty then will return None if it is empty
+#check if the string is empty then will return np.nan if it is empty
 def check_empty(string):
     if string != "":
         return string
     else:
-        return None
+        return np.nan
 
 
 #corrects the start time in a datetime object with the correct timezone
@@ -78,7 +79,7 @@ def dates_and_times_corrector(meeting):
 
 #converts the starttime string into a datetime object
 def start_datetime_corrector(start_string):
-    #will return None if the string is not in the expected format
+    #will return np.nan if the string is not in the expected format
     try:
         start_year = int(start_string[0:4])
         start_month = int(start_string[5:7])
@@ -87,4 +88,4 @@ def start_datetime_corrector(start_string):
         start_minute = int(start_string[14:16])
         return datetime.datetime(start_year, start_month, start_day,start_hour,start_minute)
     except ValueError:
-        return None
+        return np.nan
