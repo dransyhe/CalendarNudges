@@ -50,25 +50,25 @@ def not_worktime(meeting):
 
 #returns 1 if the user's company is in the title
 def user_company_in_title(meeting, company_dict):
-    alternate_list = company_dict[meeting["companyname"]]
-    for alternate in alternate_list:
-        if str(alternate).lower() in str(meeting["title"]).lower():
-            return 1
+    if meeting["companyname"]:
+        alternate_list = company_dict[meeting["companyname"]]
+        for alternate in alternate_list:
+            if str(alternate).lower() in str(meeting["title"]).lower():
+                return 1
     return 0
 
 #creates a dictonary of company titles including some alternative spellings
 def create_company_dict(meeting_list):
     company_dic = {}
     for company_name in list(set([meeting["companyname"] for meeting in meeting_list])):
-        company_dic[company_name] = [company_name]
-    try: #Need to fix error where company name might not be defined
-        company_dic["People Collective"] = company_dic["People Collective"] +["PC"]
-        company_dic["Grant Tree"] = company_dic["Grant Tree"] + ["GrantTree"]
-        company_dic["BECO Capital"] = company_dic["BECO Capital"] + ["BECO"]
-        company_dic["Shaper Impact Capital"] =  company_dic["Shaper Impact Capital"] + ["SIC"]
-        return company_dic
-    except:
-        return company_dic
+        company_dic[company_name] = [company_name, \
+                                     company_name.strip(" "),\
+                                     ''.join(ch for ch in company_name if ch.isupper()),\
+                                     ''.join(ch[0] for ch in company_name.split(" ") if ch)]
+        # put variations of company name into dictionary 
+        # includes: original name; delete spaces; only capital letters; only initials 
+    if "" in company_dic: del company_dic[""]
+    return company_dic
 
 #checks in a word is included in the meeting title
 def word_in_title(word, meeting):
@@ -160,7 +160,7 @@ def only_firstname(meeting):
         return 0
     
 
-#evaluates the word lisst
+#evaluates the word list
 def evaluate_wordlist(meeting_list, word_list, correct_tag):
     word_dict = {}
     for word in word_list:
@@ -174,7 +174,12 @@ def evaluate_wordlist(meeting_list, word_list, correct_tag):
         word_dict[word] = [total, correct, total - correct]
     return word_dict
 
-    
+
+# deal with number of guests (empty & '<' sign) 
+def no_guest_range(meeting):
+    if not meeting['noguest']:
+        return 0
+    return int(''.join(ch for ch in meeting['noguest'] if ch.isdigit()))
                 
 
 

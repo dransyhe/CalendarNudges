@@ -20,7 +20,7 @@ companyname_list =  calendar_data.companyname.values.tolist()
 calendar_data.meetingtitle = calendar_data.meetingtitle.astype(str)
 titles_list = calendar_data.meetingtitle.values.tolist()
 
-calendar_data.noguest = calendar_data.noguest.astype(int)
+calendar_data.noguest = calendar_data.noguest.astype(str)
 noguest_list = calendar_data.noguest.values.tolist()
 
 calendar_data.timezone = calendar_data.timezone.astype(str)
@@ -67,6 +67,7 @@ broadcastcheck = []
 performancecheck = []
 irrelevantcheck = []
 externalcheck = []
+noguestrange = [] 
 
 #populates the feature list
 for meeting in meeting_list:
@@ -87,6 +88,7 @@ for meeting in meeting_list:
     performancecheck.append(word_list_check(performance_keywords, meeting))
     irrelevantcheck.append(word_list_check(irrelevant_keywords,meeting))
     externalcheck.append(word_list_check(external_keywords, meeting))
+    noguestrange.append(no_guest_range(meeting)) 
 
 calendar_data["userfullname"] = userfullname
 calendar_data["workday"] = workday
@@ -106,8 +108,9 @@ calendar_data["broadcastcheck"] = broadcastcheck
 calendar_data["performancecheck"] = performancecheck
 calendar_data["irrelevantcheck"] = irrelevantcheck
 calendar_data["externalcheck"] = externalcheck
+calendar_data["noguestrange"] = noguestrange 
 
-feature_cols = ["noguest", "userfullname", "workday", "worktime", "usercompany", "bracketsafterperson",
+feature_cols = ["noguestrange", "userfullname", "workday", "worktime", "usercompany", "bracketsafterperson",
                  "andbetweenpersons", "firstnameandsurname", "personinmeeting", "teamspiritcheck",
                  "projectcheck", "timekeywordscheck", "onetoonecheck", "broadcastcheck", "performancecheck", "irrelevantcheck",
                  "externalcheck"]
@@ -123,7 +126,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
 
 # building decision tree model
-clf = DecisionTreeClassifier()
+clf = DecisionTreeClassifier(criterion="entropy", max_depth=10)   # can tune the parameters
 clf = clf.fit(X_train,y_train)
 y_pred = clf.predict(X_test)
 
