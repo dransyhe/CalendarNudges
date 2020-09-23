@@ -1,13 +1,20 @@
 import datetime
 import re
+import nltk
 from nltk import word_tokenize
-
+from nltk.stem import WordNetLemmatizer
+import pandas as pd
 from sner import Ner
 tagger = Ner(host = "localhost", port = 9199)
 
 #corrects the start time in a datetime object with the correct timezone
 def dates_and_times_corrector(meeting):
     start_datetime = start_datetime_corrector(meeting["starttime"])
+    if "nan" in meeting["endtime"]:
+        end_datetime = start_datetime_corrector(meeting["starttime"])
+
+    else:
+        end_datetime = start_datetime_corrector(meeting["endtime"])
     if meeting["timezone"][1] == "+":
         time_change = int(re.findall(r"\d+", meeting["timezone"])[0])
     elif meeting["timezone"][1] == "-":
@@ -15,7 +22,9 @@ def dates_and_times_corrector(meeting):
     else:
         time_change = 0
     start_datetime = start_datetime + datetime.timedelta(hours = time_change)
+    end_datetime = end_datetime + datetime.timedelta(hours=time_change)
     meeting["starttime"] = start_datetime
+    meeting["endtime"] = end_datetime
     return meeting    
 
 #converts the starttime string into a datetime object
@@ -48,7 +57,20 @@ def not_worktime(meeting):
     else:
         return 0
 
-#returns 1 if the user's company is in the title
+
+# returns 1 is meeting is shorter than 2 hours (less likely to be external)
+def len_duration(meeting):
+    # is date_and _times_corrector neccessary here
+
+    diff = meeting['endtime'] - meeting['starttime']
+    # what if meeting is longer than 9 hours
+    # print(duration)
+    if diff < datetime.timedelta(hours=2):
+        return 1
+    else:
+        return 0
+
+    #returns 1 if the user's company is in the title
 def user_company_in_title(meeting, company_dict):
     if meeting["companyname"]:
         alternate_list = company_dict[meeting["companyname"]]
@@ -72,7 +94,19 @@ def create_company_dict(meeting_list):
 
 #checks in a word is included in the meeting title
 def word_in_title(word, meeting):
-    return word.lower() in str(meeting["title"]).lower()
+    meeting_lower = str(meeting["title"]).lower()
+    word_lower = word.lower()
+
+    if word_lower in meeting_lower:
+        meeting_token = word_tokenize(meeting_lower)
+        lemmatizer = WordNetLemmatizer()
+        meeting_lemma = [lemmatizer.lemmatize(t) for t in meeting_token]
+
+        return word.lower() in meeting_lemma
+
+    #else:
+     #   return False
+
 
 #returns 1 if any word in word_list is included in the meeting title
 def word_list_check(word_list, meeting):
@@ -179,8 +213,12 @@ def evaluate_wordlist(meeting_list, word_list, correct_tag):
 def no_guest_range(meeting):
     if not meeting['noguest']:
         return 0
-    return int(''.join(ch for ch in meeting['noguest'] if ch.isdigit()))
-                
+    if meeting['noguest'].isdigit():
+        return int(''.join(ch for ch in meeting['noguest']))
+    else:
+        print(meeting['noguest'])
+        return -1
+
 
 
 

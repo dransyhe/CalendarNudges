@@ -3,12 +3,33 @@ from newtagchecks import *
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
+import time
 
 
 #read the input data file in CSV
+
+pd.options.display.max_rows
+pd.set_option('display.max_rows', None)
+
 col_names = ['username', 'jobrole', 'instructor', 'companyname', 'timezone', 'companysize',
-			 'teamsize', 'starttime', 'lastsync', 'meetingtitle', 'noguest', 'tag'] 
-calendar_data = pd.read_csv("input_files/New Tagged.csv", header=0, names=col_names)
+			 'teamsize', 'starttime','endtime', 'lastsync', 'meetingtitle', 'noguest', 'tag']
+calendar_data = pd.read_csv("input_files/New Tagged 3.csv", header=0, names=col_names)
+#print(calendar_data['endtime'])
+#print(calendar_data['starttime'])
+
+#y =pd.isna(calendar_data['endtime'][65])
+#print(y)
+#print(type(calendar_data['endtime'][65]))
+
+#print(calendar_data['noguest'])
+
+#p=0
+#for i in calendar_data['endtime']:
+ #   if pd.isna(calendar_data['endtime'](i)):
+  #      p=+1
+
+
+
 
 #creates lists of username, companyname, title, noguests, timezone and startime
 calendar_data.username = calendar_data.username.astype(str)
@@ -32,6 +53,9 @@ starttime_list = calendar_data.starttime.values.tolist()
 calendar_data.tag = calendar_data.tag.astype(str)
 tag_list = calendar_data.tag.values.tolist()
 
+calendar_data.endtime = calendar_data.endtime.astype(str)
+endtime_list = calendar_data.endtime.values.tolist()
+
 #creates a list of dictonaries each representing a meeting and converts the starttime into a datetime object
 meeting_list = []
 for i in range(len(usernames_list)):
@@ -42,6 +66,7 @@ for i in range(len(usernames_list)):
     meeting['noguest'] = noguest_list[i]
     meeting['timezone'] = timezone_list[i]
     meeting['starttime'] = starttime_list[i]
+    meeting['endtime'] = endtime_list[i]
     meeting['tag'] = tag_list[i]
     meeting = dates_and_times_corrector(meeting)
     meeting_list += [meeting]
@@ -52,6 +77,7 @@ company_dict = create_company_dict(meeting_list)
 userfullname = []
 workday = []
 worktime = []
+duration = []
 usercompany = []
 onlyuserfirst = []
 bracketsafterperson = []
@@ -74,6 +100,7 @@ for meeting in meeting_list:
     userfullname.append(users_fullname(meeting))
     workday.append(not_workday(meeting))
     worktime.append(not_worktime(meeting))
+    duration.append(len_duration(meeting))
     usercompany.append(user_company_in_title(meeting, company_dict))
     onlyuserfirst.append(first_name_only(meeting))
     bracketsafterperson.append(brackets_following_person(meeting))
@@ -93,6 +120,7 @@ for meeting in meeting_list:
 calendar_data["userfullname"] = userfullname
 calendar_data["workday"] = workday
 calendar_data["worktime"] = worktime
+calendar_data["duration"]= duration
 calendar_data["usercompany"] = usercompany
 #calendar_data["onlyuserfirst"] = onlyuserfirst
 calendar_data["bracketsafterperson"] = bracketsafterperson
@@ -108,9 +136,10 @@ calendar_data["broadcastcheck"] = broadcastcheck
 calendar_data["performancecheck"] = performancecheck
 calendar_data["irrelevantcheck"] = irrelevantcheck
 calendar_data["externalcheck"] = externalcheck
-calendar_data["noguestrange"] = noguestrange 
+calendar_data["noguestrange"] = noguestrange
 
-feature_cols = ["noguestrange", "userfullname", "workday", "worktime", "usercompany", "bracketsafterperson",
+
+feature_cols = ["noguestrange", "userfullname", "workday", "worktime","duration", "usercompany", "bracketsafterperson",
                  "andbetweenpersons", "firstnameandsurname", "personinmeeting", "teamspiritcheck",
                  "projectcheck", "timekeywordscheck", "onetoonecheck", "broadcastcheck", "performancecheck", "irrelevantcheck",
                  "externalcheck"]
@@ -133,3 +162,8 @@ y_pred = clf.predict(X_test)
 
 # evaluating model
 print("Accuracy:", metrics.accuracy_score(y_test, y_pred))
+
+end = time.perf_counter()
+print(end)
+
+
