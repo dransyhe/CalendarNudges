@@ -216,7 +216,7 @@ def no_guest_range(meeting):
     if meeting['noguest'].isdigit():
         return int(''.join(ch for ch in meeting['noguest']))
     else:
-        print(meeting['noguest'])
+
         return -1
 
 

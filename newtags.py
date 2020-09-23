@@ -14,19 +14,7 @@ pd.set_option('display.max_rows', None)
 col_names = ['username', 'jobrole', 'instructor', 'companyname', 'timezone', 'companysize',
 			 'teamsize', 'starttime','endtime', 'lastsync', 'meetingtitle', 'noguest', 'tag']
 calendar_data = pd.read_csv("input_files/New Tagged 3.csv", header=0, names=col_names)
-#print(calendar_data['endtime'])
-#print(calendar_data['starttime'])
 
-#y =pd.isna(calendar_data['endtime'][65])
-#print(y)
-#print(type(calendar_data['endtime'][65]))
-
-#print(calendar_data['noguest'])
-
-#p=0
-#for i in calendar_data['endtime']:
- #   if pd.isna(calendar_data['endtime'](i)):
-  #      p=+1
 
 
 
